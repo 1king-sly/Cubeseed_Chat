@@ -9,8 +9,8 @@ import MessageContact from "./message-contact"
 const MessageSidebar: React.FC = ({ onContactClick }) => {
   return (
     <>
-      <div className="flex min-h-screen w-[100vw] justify-center overflow-x-hidden  py-2 sm:w-[40vw] lg:w-[30vw] ">
-        <div className="fixed z-20 w-[100vw] bg-white px-4 sm:w-[40vw] lg:w-[30vw] ">
+      <div className="flex min-h-screen w-[100vw] justify-center overflow-x-hidden  py-1 sm:w-[40vw] lg:w-[30vw]  ">
+        <div className="fixed z-20 w-[100vw] bg-white px-4 py-1 sm:w-[40vw] lg:w-[30vw] ">
           <div className="flex w-full items-center justify-between">
             <h4 className="text-2xl">Messages</h4>
             <p>
@@ -35,7 +35,7 @@ const MessageSidebar: React.FC = ({ onContactClick }) => {
           </div>
         </div>
 
-        <div className="mt-20 flex  w-full flex-col items-center px-4  ">
+        <div className="mt-[84px] flex  w-full flex-col items-center px-4  ">
           <MessageContact
             userName="Byrone Kinsly"
             userImage={profile}
