@@ -1,7 +1,8 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import Image from "next/image"
 import PropTypes from "prop-types"
 import MessageNotification from "./MessageNotification"
+import { io } from "socket.io-client"
 
 interface MessageContactProps {
   userName: string
@@ -14,6 +15,20 @@ const MessageContact: React.FC<MessageContactProps> = ({
   userImage,
   onClick,
 }) => {
+  const [notification, setNotification] = useState(Number)
+
+  useEffect(() => {
+    const socket = io(
+      " ws://127.0.0.1:8000/ws/notifications/${username_of_other_person_in_conversation}/"
+    )
+    socket.on("single_conversation_unread_count", (data) => {
+      setNotification(data.unread_count)
+    })
+
+    return () => {
+      socket.disconnect()
+    }
+  }, [])
   return (
     <div
       className="bg-#45DFA9 m-1 flex h-16  w-full cursor-pointer
@@ -34,7 +49,7 @@ const MessageContact: React.FC<MessageContactProps> = ({
       </div>
 
       <div>
-        <MessageNotification number={"5"} />
+        <MessageNotification number={notification} />
       </div>
     </div>
   )

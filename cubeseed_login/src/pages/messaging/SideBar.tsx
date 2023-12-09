@@ -1,6 +1,6 @@
 import React from "react"
 import Image from "next/image"
-import profile from "@/assets/farmer image 1.png"
+import profile from "../messaging/icons/profile.png"
 import message from "./icons/newMessage.svg"
 import bar from "./icons/bar.svg"
 import search from "./icons/search.svg"

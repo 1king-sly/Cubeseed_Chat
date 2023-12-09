@@ -9,11 +9,17 @@ import { io } from "socket.io-client"
 
 const MessageSidebar: React.FC = ({ onContactClick }) => {
   const [rooms, setRooms] = useState([])
+  const [notification, setNotification] = useState(Number)
 
   useEffect(() => {
     const socket = io("ws://127.0.0.1:8000/ws/rooms")
     socket.on("online_user_list", (data) => {
       setRooms(data.users)
+    })
+
+    const notification = io(" ws://127.0.0.1:8000/ws/notifications/")
+    notification.on("unread_count", (data) => {
+      setNotification(data.unread_count)
     })
 
     return () => {
@@ -26,9 +32,11 @@ const MessageSidebar: React.FC = ({ onContactClick }) => {
         <div className="fixed z-20 w-[100vw] bg-white px-4 sm:w-[40vw] lg:w-[30vw] ">
           <div className="flex w-full items-center justify-between">
             <h4 className="text-2xl">Messages</h4>
-            <p>
-              {" "}
+            <p className="flex ">
               <Image src={message} alt="" />
+              <div className="h-full items-start justify-start text-sm text-[#45dfa9]">
+                {notification}
+              </div>
             </p>
           </div>
           <div className="flex h-12 w-full items-center justify-between">

@@ -1,7 +1,7 @@
 import React from "react"
 
 interface NotificationProps {
-  number: string
+  number: number
 }
 
 const MessageNotification: React.FC<NotificationProps> = ({ number }) => {
