@@ -68,6 +68,7 @@ const MessageSidebar: React.FC = ({ onContactClick }) => {
               <Image src={bar} alt="" />
             </p>
             <input
+              id="search"
               type="text"
               placeholder="Search messages"
               className="h-full border-none outline-none"
