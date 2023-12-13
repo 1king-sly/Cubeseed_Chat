@@ -34,7 +34,7 @@ const MessageSidebar: React.FC = ({ onContactClick }) => {
             <h4 className="text-2xl">Messages</h4>
             <p className="flex ">
               <Image src={message} alt="" />
-              <div className="h-full items-start justify-start text-sm text-[#45dfa9]">
+              <div className="notifications h-full items-start justify-start text-sm text-[#45dfa9]">
                 {notification}
               </div>
             </p>

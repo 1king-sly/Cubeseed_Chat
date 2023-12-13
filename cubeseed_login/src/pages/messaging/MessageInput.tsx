@@ -5,11 +5,16 @@ import sendIcon from "./icons/send.svg"
 import mic from "./icons/mic.svg"
 import image from "./icons/image.svg"
 import Recorder from "recorder-js"
+import { io } from "socket.io-client"
 
-const MessageInput = () => {
+interface MessageInputProps {
+  onSendMessage: (message: string, file: File | null) => void
+}
+
+const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
   const [inputValue, setInputValue] = useState("")
-  const [selectedFile, setSelectedFile] = useState(null)
-  const [recorder, setRecorder] = useState(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [recorder, setRecorder] = useState<Recorder | null>(null)
   const [isRecording, setIsRecording] = useState(false)
 
   useEffect(() => {
@@ -33,16 +38,16 @@ const MessageInput = () => {
     initRecorder()
   }, [])
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value)
   }
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0]
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0]
     setSelectedFile(file)
   }
 
-  const handleInputKeyPress = (e) => {
+  const handleInputKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSendClick()
     }
@@ -74,14 +79,9 @@ const MessageInput = () => {
     }
   }
 
-  const handleSendClick = async () => {
-    // Handle sending message logic
-    let message = inputValue
-
-    if (selectedFile) {
-      // If a file is selected, append its details to the message
-      message += `<br/>File: ${selectedFile.name}, Type: ${selectedFile.type}`
-    }
+  const handleSendClick = () => {
+    // Use the onSendMessage prop to send the message and file
+    onSendMessage(inputValue, selectedFile)
 
     // Clear the textarea and reset its height
     setInputValue("")
@@ -94,13 +94,14 @@ const MessageInput = () => {
         // Check if the recorder is in the "recording" state
         if (isRecording) {
           // Stop the recorder if it's still recording
-          await recorder.stop()
-          const audioBlob = await recorder.getBlob()
-          // Now you can use the 'audioBlob' for sending the audio file
-          console.log("Audio Blob:", audioBlob)
+          recorder.stop().then(async () => {
+            const audioBlob = await recorder.getBlob()
+            // Now you can use the 'audioBlob' for sending the audio file
+            console.log("Audio Blob:", audioBlob)
 
-          // Toggle the recording state
-          setIsRecording(false)
+            // Toggle the recording state
+            setIsRecording(false)
+          })
         }
       } catch (error) {
         console.error("Error stopping recorder:", error)
@@ -108,9 +109,6 @@ const MessageInput = () => {
     } else {
       console.warn("Recorder is not initialized.")
     }
-
-    // Now you can use the 'message' variable for sending the complete message
-    console.log("Complete Message:", message)
   }
 
   const adjustTextareaHeight = () => {
@@ -121,54 +119,53 @@ const MessageInput = () => {
       textarea.style.height = `${textarea.scrollHeight}px`
     }
   }
+
   return (
-    <>
-      <div className="fixed bottom-0  flex w-[100vw]  justify-center bg-white px-2 shadow-md sm:w-[60vw] sm:px-4 lg:w-[70vw] lg:px-4">
-        <div className="flex w-full items-center justify-between gap-2">
-          <Image src={emoji} alt="" className="emoji cursor-pointer" />
-          <textarea
-            id="messageTextarea"
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyPress={handleInputKeyPress}
-            className="mt-6 flex w-full resize-none border-none bg-transparent outline-none "
-            placeholder="Message here...."
+    <div className="fixed bottom-0  flex w-[100vw]  justify-center bg-white px-2 shadow-md sm:w-[60vw] sm:px-4 lg:w-[70vw] lg:px-4">
+      <div className="flex w-full items-center justify-between gap-2">
+        <Image src={emoji} alt="" className="emoji cursor-pointer" />
+        <textarea
+          id="messageTextarea"
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyPress={handleInputKeyPress}
+          className="mt-6 flex w-full resize-none border-none bg-transparent outline-none "
+          placeholder="Message here...."
+        />
+        <div className="relative flex flex-row gap-6 pr-12 sm:pr-5 ">
+          <Image
+            src={mic}
+            alt="User Image"
+            className="cursor-pointer"
+            onClick={handleMicClick}
           />
-          <div className="relative flex flex-row gap-6 pr-12 sm:pr-5 ">
-            <Image
-              src={mic}
-              alt="User Image"
-              className="cursor-pointer"
-              onClick={handleSendClick}
-            />
-            <div className=" -mt-5 h-12 w-12   ">
-              <label htmlFor="file-upload" className="">
-                <Image
-                  src={image}
-                  alt="User Image"
-                  className=" h-full w-full cursor-pointer"
-                />
-                <input
-                  id="file-upload"
-                  name="file-upload"
-                  title="file-upload"
-                  placeholder="file-upload"
-                  type="file"
-                  onChange={handleFileChange}
-                  className="sr-only"
-                />
-              </label>
-            </div>
-            <Image
-              src={sendIcon}
-              alt="Send Message"
-              className="cursor-pointer"
-              onClick={handleSendClick}
-            />
+          <div className=" -mt-5 h-12 w-12   ">
+            <label htmlFor="file-upload" className="">
+              <Image
+                src={image}
+                alt="User Image"
+                className=" h-full w-full cursor-pointer"
+              />
+              <input
+                id="file-upload"
+                name="file-upload"
+                title="file-upload"
+                placeholder="file-upload"
+                type="file"
+                onChange={handleFileChange}
+                className="sr-only"
+              />
+            </label>
           </div>
+          <Image
+            src={sendIcon}
+            alt="Send Message"
+            className="cursor-pointer"
+            onClick={handleSendClick}
+          />
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
