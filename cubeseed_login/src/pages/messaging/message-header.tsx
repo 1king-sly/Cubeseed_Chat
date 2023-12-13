@@ -1,6 +1,7 @@
 import React from "react"
 import Image from "next/image"
-import logo from "@/assets/cubeseed.png"
+import logo from "public/cubeseed.png"
+
 import notificationIcon from "./icons/bell.svg"
 import walletIcon from "./icons/wallet.svg"
 import messageIcon from "./icons/messageFill.svg"

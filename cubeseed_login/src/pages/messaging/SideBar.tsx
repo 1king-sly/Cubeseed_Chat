@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react"
 import Image from "next/image"
-import profile from "@/assets/farmer image 1.png"
 import message from "./icons/newMessage.svg"
 import bar from "./icons/bar.svg"
 import search from "./icons/search.svg"
 import MessageContact from "./message-contact"
+import profile from "./icons/profile.png"
 import Alert from "./Alert"
 import { io } from "socket.io-client"
 
