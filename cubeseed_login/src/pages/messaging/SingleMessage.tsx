@@ -19,13 +19,6 @@ const SingleMessage: React.FC<SingleMessageProps> = ({ chat }) => {
     <>
       <div className="text-md flex flex-col items-end gap-5 p-4 text-gray-900">
         <div className="flex w-full flex-col gap-5">
-          {/* Displaying text message */}
-          {chat.message && (
-            <p className="h-fit w-fit max-w-[70%] rounded-lg rounded-bl-none bg-gray-200 p-2 shadow-lg">
-              {chat.message}
-            </p>
-          )}
-
           {/* Displaying multimedia content (image) */}
           {chat.multimedia_url && (
             <Image
@@ -33,6 +26,13 @@ const SingleMessage: React.FC<SingleMessageProps> = ({ chat }) => {
               alt="Multimedia Content"
               className="max-w-[70%] rounded-lg rounded-bl-none shadow-lg"
             />
+          )}
+
+          {/* Displaying text message */}
+          {chat.message && (
+            <p className="h-fit w-fit max-w-[70%] rounded-lg rounded-bl-none bg-gray-200 p-2 shadow-lg">
+              {chat.message}
+            </p>
           )}
         </div>
       </div>

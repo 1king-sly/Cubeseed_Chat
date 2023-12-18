@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import Image from "next/image"
+import Image, { StaticImageData } from "next/image"
 import message from "./icons/newMessage.svg"
 import bar from "./icons/bar.svg"
 import search from "./icons/search.svg"
@@ -8,9 +8,15 @@ import profile from "./icons/profile.png"
 import Alert from "./Alert"
 import { io } from "socket.io-client"
 
-const MessageSidebar: React.FC = ({ onContactClick }) => {
+interface MessageSidebarProps {
+  onContactClick: (userName: string, userImage: StaticImageData | null) => void
+}
+
+const MessageSidebar: React.FC<MessageSidebarProps> = ({ onContactClick }) => {
   const [rooms, setRooms] = useState([])
-  const [notifications, setNotifications] = useState([])
+  const [notifications, setNotifications] = useState<{
+    [room: string]: number
+  }>({})
   const [allNotificationsCount, setAllNotificationsCount] = useState(0)
   const [alert, setAlert] = useState<string | null>(null)
 
@@ -86,7 +92,7 @@ const MessageSidebar: React.FC = ({ onContactClick }) => {
               userName={room}
               userImage={profile}
               unreadCount={notifications[room] || 0}
-              onClick={() => onContactClick(room)}
+              onClick={() => onContactClick(room, profile)}
             />
           ))}
         </div>

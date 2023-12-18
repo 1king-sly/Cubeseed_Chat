@@ -23,6 +23,7 @@
     "react-select": "^5.7.3",
     "recorder-js": "^1.0.7",
     "sass": "^1.62.1",
+    "simple-peer": "^9.11.1",
     "socket.io-client": "^4.7.2"
   },
   "devDependencies": {
@@ -40,6 +41,8 @@
     "@types/node": "20.1.4",
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
+    "@types/recorder-js": "^1.0.4",
+    "@types/simple-peer": "^9.11.8",
     "autoprefixer": "^10.4.14",
     "chromatic": "^7.4.0",
     "eslint": "8.48.0",

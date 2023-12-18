@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react"
-import Image from "next/image"
+import Image, { StaticImageData } from "next/image"
 import PropTypes from "prop-types"
 import MessageNotification from "./MessageNotification"
 import { io } from "socket.io-client"
+import profile from "./icons/profile.png"
 
 interface MessageContactProps {
   userName: string
-  userImage: string
-  onClick: (userName: string, userImage: string) => void
+  userImage: StaticImageData | null
+  unreadCount: number
+  onClick: (userName: string, userImage: StaticImageData | null) => void
 }
 
 const MessageContact: React.FC<MessageContactProps> = ({
@@ -38,7 +40,7 @@ const MessageContact: React.FC<MessageContactProps> = ({
       <div className="flex items-center gap-5">
         <div>
           <Image
-            src={userImage}
+            src={userImage || profile}
             alt="User Image"
             className="h-12 w-fit rounded-full object-cover"
           />
@@ -55,10 +57,10 @@ const MessageContact: React.FC<MessageContactProps> = ({
   )
 }
 
-MessageContact.propTypes = {
-  userName: PropTypes.string.isRequired,
-  userImage: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
-}
+// MessageContact.propTypes = {
+//   userName: PropTypes.string.isRequired,
+//   userImage: PropTypes.string.isRequired,
+//   onClick: PropTypes.func.isRequired,
+// }
 
 export default MessageContact

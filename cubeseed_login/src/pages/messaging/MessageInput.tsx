@@ -1,3 +1,4 @@
+// MessageInput.tsx
 import React, { useState, useEffect } from "react"
 import Image from "next/image"
 import emoji from "./icons/emoji.svg"
@@ -5,41 +6,42 @@ import sendIcon from "./icons/send.svg"
 import mic from "./icons/mic.svg"
 import image from "./icons/image.svg"
 import Recorder from "recorder-js"
-import { io } from "socket.io-client"
+import stop from "./icons/stop.svg"
+
+const audioContext: AudioContext | null =
+  typeof window !== "undefined" &&
+  (window.AudioContext || (window as any).webkitAudioContext)
+    ? new ((window as any).AudioContext || (window as any).webkitAudioContext)()
+    : null
+
+const recorder = audioContext
+  ? new Recorder(audioContext, { onAnalysed: (data) => console.log(data) })
+  : null
 
 interface MessageInputProps {
-  onSendMessage: (message: string, file: File | null) => void
+  onSendMessage: (message: string, file: Blob | null) => void
+  inputMessage: string
+  setInputMessage: React.Dispatch<React.SetStateAction<string>>
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
-  const [inputValue, setInputValue] = useState("")
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [recorder, setRecorder] = useState<Recorder | null>(null)
+const MessageInput: React.FC<MessageInputProps> = ({
+  onSendMessage,
+  inputMessage,
+  setInputMessage,
+}) => {
+  const [selectedFile, setSelectedFile] = useState<Blob | null>(null)
   const [isRecording, setIsRecording] = useState(false)
+  const [icon, setIcon] = useState(mic)
 
   useEffect(() => {
-    // Initialize recorder when the component mounts
-    const initRecorder = async () => {
-      try {
-        const audioStream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        })
-        const audioContext = new AudioContext()
-        const mediaStreamSource =
-          audioContext.createMediaStreamSource(audioStream)
-        const recorderInstance = new Recorder(mediaStreamSource)
-
-        setRecorder(recorderInstance)
-      } catch (error) {
-        console.error("Error initializing recorder:", error)
-      }
-    }
-
-    initRecorder()
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => recorder?.init(stream))
+      .catch((err) => console.log("Uh oh... unable to get stream...", err))
   }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputValue(e.target.value)
+    setInputMessage(e.target.value)
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,67 +50,40 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
   }
 
   const handleInputKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
       handleSendClick()
     }
   }
 
-  const handleMicClick = async () => {
-    // Check if recorder is initialized
-    if (recorder) {
-      try {
-        // Check if the recorder is in the "recording" state
-        if (isRecording) {
-          // If recording, stop the recorder
-          await recorder.stop()
-          const audioBlob = await recorder.getBlob()
-          console.log("Recording stopped. Audio Blob:", audioBlob)
-        } else {
-          // If not recording, start the recorder
-          await recorder.start()
-          console.log("Recording started.")
-        }
-
-        // Toggle the recording state
-        setIsRecording(!isRecording)
-      } catch (error) {
-        console.error("Error handling mic click:", error)
-      }
+  const handleMicClick = () => {
+    if (isRecording) {
+      stopRecording()
     } else {
-      console.warn("Recorder is not initialized.")
+      startRecording()
     }
   }
 
-  const handleSendClick = () => {
-    // Use the onSendMessage prop to send the message and file
-    onSendMessage(inputValue, selectedFile)
+  const startRecording = () => {
+    recorder?.start().then(() => {
+      setIcon(stop)
+      setIsRecording(true)
+    })
+  }
 
-    // Clear the textarea and reset its height
-    setInputValue("")
+  const stopRecording = () => {
+    recorder?.stop().then(({ blob }) => {
+      setIcon(mic)
+      setIsRecording(false)
+      onSendMessage(inputMessage, blob)
+    })
+  }
+
+  const handleSendClick = () => {
+    onSendMessage(inputMessage, selectedFile)
+    setInputMessage("")
     setSelectedFile(null)
     adjustTextareaHeight()
-
-    // Check if recorder is initialized
-    if (recorder) {
-      try {
-        // Check if the recorder is in the "recording" state
-        if (isRecording) {
-          // Stop the recorder if it's still recording
-          recorder.stop().then(async () => {
-            const audioBlob = await recorder.getBlob()
-            // Now you can use the 'audioBlob' for sending the audio file
-            console.log("Audio Blob:", audioBlob)
-
-            // Toggle the recording state
-            setIsRecording(false)
-          })
-        }
-      } catch (error) {
-        console.error("Error stopping recorder:", error)
-      }
-    } else {
-      console.warn("Recorder is not initialized.")
-    }
   }
 
   const adjustTextareaHeight = () => {
@@ -121,12 +96,12 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
   }
 
   return (
-    <div className="fixed bottom-0  flex w-[100vw]  justify-center bg-white px-2 shadow-md sm:w-[60vw] sm:px-4 lg:w-[70vw] lg:px-4">
+    <div className="fixed bottom-0 flex w-[100vw] justify-center bg-white px-2 shadow-md sm:w-[60vw] sm:px-4 lg:w-[70vw] lg:px-4">
       <div className="flex w-full items-center justify-between gap-2">
         <Image src={emoji} alt="" className="emoji cursor-pointer" />
         <textarea
           id="messageTextarea"
-          value={inputValue}
+          value={inputMessage}
           onChange={handleInputChange}
           onKeyPress={handleInputKeyPress}
           className="mt-6 flex w-full resize-none border-none bg-transparent outline-none "
@@ -134,17 +109,17 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
         />
         <div className="relative flex flex-row gap-6 pr-12 sm:pr-5 ">
           <Image
-            src={mic}
-            alt="User Image"
+            src={icon}
+            alt="record"
             className="cursor-pointer"
             onClick={handleMicClick}
           />
-          <div className=" -mt-5 h-12 w-12   ">
+          <div className="-mt-5 h-12 w-12">
             <label htmlFor="file-upload" className="">
               <Image
                 src={image}
-                alt="User Image"
-                className=" h-full w-full cursor-pointer"
+                alt=" Image"
+                className="h-full w-full cursor-pointer"
               />
               <input
                 id="file-upload"

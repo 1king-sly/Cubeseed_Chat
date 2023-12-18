@@ -1,22 +1,27 @@
 import React, { useEffect, useState } from "react"
-import BuyerProfile from "./BuyerProfile"
+import BuyerProfile from "./Buyerprofile"
 import MessageInput from "./MessageInput"
 import MessagesShow from "./MessagesShow"
 import profile from "../messaging/icons/profile.png"
-import { io } from "socket.io-client"
+import { io, Socket } from "socket.io-client"
 
 interface MessagePanelProps {
   selectedContact: string | null
 }
 
 const MessagePanel: React.FC<MessagePanelProps> = ({ selectedContact }) => {
-  const [chats, setChats] = useState([])
+  const [chats, setChats] = useState<any[]>([])
   const [inputMessage, setInputMessage] = useState("")
-  const [socket, setSocket] = useState<any>(null) // Declare socket state
+  const [socket, setSocket] = useState<Socket | null>(null)
 
   useEffect(() => {
     if (!selectedContact) {
       return
+    }
+
+    // Close the existing socket connection before creating a new one
+    if (socket) {
+      socket.disconnect()
     }
 
     // Establish a WebSocket connection to the specific chat room
@@ -25,32 +30,30 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ selectedContact }) => {
 
     // Listen for chat messages in the room
     newSocket.on("chat_message", (data) => {
-      // Handle received chat message
-      // You may want to update the chats state accordingly
       console.log("Received chat message:", data)
+      setChats((prevChats) => [...prevChats, data])
     })
 
     // Clean up the socket connection on component unmount
     return () => {
       newSocket.disconnect()
     }
-  }, [selectedContact])
+  }, [selectedContact, socket])
 
   const handleSendMessage = () => {
     if (!inputMessage.trim() || !selectedContact || !socket) {
-      return // Don't send empty messages or if no contact is selected
+      return
     }
 
     // Send the message to the specified chat room
-    // Emit a chat message event to the server
     const messagePayload = {
       type: "chat_message",
       message: inputMessage,
       room: selectedContact,
     }
 
-    // Example: Emitting the chat message event to the server
-    socket.emit("chat_message", messagePayload)
+    // Emit the message to the server
+    socket?.emit("chat_message", messagePayload)
 
     // For demonstration purposes, update the local state with the sent message
     setChats((prevChats) => [...prevChats, messagePayload])
@@ -58,10 +61,10 @@ const MessagePanel: React.FC<MessagePanelProps> = ({ selectedContact }) => {
   }
 
   return (
-    <div className="fixed flex min-h-screen justify-center  bg-gray-100">
+    <div className="fixed flex min-h-screen justify-center bg-gray-100">
       <div className="flex w-full flex-col overflow-hidden bg-white sm:w-[60vw] lg:w-[70vw]">
         <BuyerProfile userName={selectedContact} userImage={profile} />
-        <div className="mt-[50px] flex-1 bg-gray-100">
+        <div className="mt-8 flex-1 overflow-y-auto bg-gray-100 px-4">
           <MessagesShow chats={chats} />
         </div>
         <div>
