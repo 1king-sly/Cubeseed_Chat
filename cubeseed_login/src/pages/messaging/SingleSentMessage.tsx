@@ -14,7 +14,7 @@ interface SingleMessageProps {
   }
 }
 
-const SingleMessage: React.FC<SingleMessageProps> = ({ chat }) => {
+const SingleSentMessage: React.FC<SingleMessageProps> = ({ chat }) => {
   return (
     <>
       <div className="text-md flex flex-col items-end gap-5 p-4 text-gray-900">
@@ -34,10 +34,15 @@ const SingleMessage: React.FC<SingleMessageProps> = ({ chat }) => {
               {chat.message}
             </p>
           )}
+
+          <div className=" h-5 w-full justify-between px-1 ">
+            <p>{chat.date_added}</p>
+            <p>{chat.from_user.username} </p>
+          </div>
         </div>
       </div>
     </>
   )
 }
 
-export default SingleMessage
+export default SingleSentMessage

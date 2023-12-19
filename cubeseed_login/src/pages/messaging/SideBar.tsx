@@ -24,6 +24,7 @@ const MessageSidebar: React.FC<MessageSidebarProps> = ({ onContactClick }) => {
     const socket = io("ws://127.0.0.1:8000/ws/rooms")
     socket.on("online_user_list", (data) => {
       setRooms(data.users)
+      console.log(data.users)
     })
 
     const notificationSocket = io("ws://127.0.0.1:8000/ws/notifications/")
